@@ -5,7 +5,7 @@ import { Format, Platform } from "esbuild";
 import inquirer from "inquirer";
 
 import Application from "../../Application";
-import { CommandHandler, ConfigType, GlobalOptions, logger } from "../../lib";
+import { CommandHandler, ConfigType, GlobalOptions, fileExists, logger } from "../../lib";
 
 interface Options extends GlobalOptions {}
 
@@ -29,11 +29,11 @@ export class InitCommand extends CommandHandler<Options> {
       `${Application.get().packageJson.name}.config.js`,
     );
 
-    try {
-      await fs.access(filename);
-      if (!(await inquireYesOrNo("Configuration file already exists. Overwrite?"))) return;
-    } catch (e) {
-      // nop
+    if (
+      (await fileExists(filename)) &&
+      !(await inquireYesOrNo("Configuration file already exists. Overwrite?"))
+    ) {
+      return;
     }
 
     const questions = [

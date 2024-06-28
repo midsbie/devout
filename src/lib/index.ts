@@ -1,6 +1,8 @@
 export * from "./logger";
 export * from "./typedefs";
 
+export * from "./fs";
+
 export * from "./CommandHandler";
 export * from "./Config";
 export * from "./EsBuildCompiler";
