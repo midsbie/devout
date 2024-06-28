@@ -1,0 +1,75 @@
+{
+  "name": "devout",
+  "version": "0.0.1",
+  "description": "A NodeJS build tool for library developers, devoutly outputting builds and automating project setup. Streamlines the creation process, eliminating repetitive tasks and enhancing productivity.",
+  "main": "src/index.ts",
+  "type": "module",
+  "scripts": {
+    "build": "npm run build:bundle && npm run build:types",
+    "build:bundle": "esbuild --bundle --format=esm --packages=external --minify --platform=node --sourcemap --outfile=dist/index.js src/index.ts",
+    "build:types": "dts-bundle-generator --export-referenced-types=false -o dist/index.d.ts src/index.ts",
+    "test": "jest",
+    "lint": "eslint .",
+    "prepare": "npm run build",
+    "prepublishOnly": "npm test && npm run lint"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/midsbie/devout.git"
+  },
+  "keywords": [
+    "build",
+    "make",
+    "bundler",
+    "library"
+  ],
+  "author": "Miguel Guedes <miguel@softgeist.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/midsbie/devout/issues"
+  },
+  "homepage": "https://github.com/midsbie/devout#readme",
+  "files": [
+    "README.md",
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "bin": {
+    "devout": "./dist/index.js"
+  },
+  "dependencies": {
+    "@types/lodash.merge": "^4.6.9",
+    "chalk": "^5.3.0",
+    "commander": "^12.1.0",
+    "find-package-json": "^1.2.0",
+    "find-up": "^7.0.0",
+    "inquirer": "^9.3.1",
+    "lodash.merge": "^4.6.2",
+    "winston": "^3.13.0"
+  },
+  "devDependencies": {
+    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+    "@types/find-package-json": "^1.2.6",
+    "@types/inquirer": "^9.0.7",
+    "@types/node": "^20.14.8",
+    "dts-bundle-generator": "^9.5.1",
+    "esbuild": "^0.21.5",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.2",
+    "typescript": "^5.5.2",
+    "typescript-eslint": "^7.13.1"
+  },
+  "peerDependencies": {
+    "dts-bundle-generator": "^9",
+    "esbuild": "^0",
+    "eslint": "^8",
+    "prettier": "^3",
+    "typescript": "^5",
+    "typescript-eslint": "^7"
+  }
+}

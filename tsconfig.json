@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    /* Visit https://aka.ms/tsconfig to read more about this file */
+    "target": "es6",
+    "module": "esnext",
+    "sourceMap": true,
+    "strict": true,
+    "declaration": false,
+    "outDir": "dist",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitAny": true,
+    // For web applications targeting modern web browsers, the lib array should include typings for
+    // the DOM and ECMAScript features in use. For React applications, DOM typings are essential for
+    // manipulating and accessing the DOM. Targeting modern web browsers facilitates the use of
+    // recent ECMAScript features.
+    //
+    // * "esnext" includes the latest ECMAScript features, ensuring access to the most recent
+    //   language developments. While "esnext" is recommended for leveraging cutting-edge features,
+    //   specific versions like "es2020" can be targeted for more conservative compatibility. Ensure
+    //   that your development and production environments support these features, either natively
+    //   or through polyfills and bundlers.
+    "lib": ["esnext"]
+  }
+}
