@@ -1,8 +1,13 @@
+import path from "node:path";
+
 import findPackageJson from "find-package-json";
 
 export interface ProxiedPackageJson {
   [key: string]: any;
+
+  filename: string;
   get isModule(): boolean;
+  isBin(filename: string): boolean;
 }
 
 export class PackageJson {
@@ -36,11 +41,20 @@ export class PackageJson {
     });
   }
 
+  pathFor(filename: string): string {
+    return path.isAbsolute(filename) ? filename : path.join(path.dirname(this.filename), filename);
+  }
+
   get isModule(): boolean {
     return this.json.type === "module";
   }
 
   get entry(): string {
     return this.json.main;
+  }
+
+  isBin(filename: string): boolean {
+    filename = this.pathFor(filename);
+    return Object.keys(this.json.bin).some((k) => this.pathFor(this.json.bin[k]) === filename);
   }
 }

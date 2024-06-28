@@ -1,4 +1,12 @@
-import { CommandHandler, EsBuildCompiler, GlobalOptions, logger } from "../../lib";
+import { chmod } from "node:fs/promises";
+
+import {
+  CommandHandler,
+  EsBuildCompiler,
+  EsBuildConfigurator,
+  GlobalOptions,
+  logger,
+} from "../../lib";
 
 interface Options extends GlobalOptions {
   output: string;
@@ -13,14 +21,23 @@ export class BuildCommand extends CommandHandler<Options> {
       process.exit(1);
     }
 
-    const compiler = new EsBuildCompiler(cfg);
+    const configurator = new EsBuildConfigurator(this.context);
+    const compiler = new EsBuildCompiler();
 
     for (const format of cfg.formats) {
+      const buildConfig = configurator.configure(format);
       try {
-        await compiler.build(format);
+        await compiler.build(buildConfig.options);
       } catch (error) {
         logger.error("Build failed:", error);
         process.exit(1);
+      }
+
+      if (buildConfig.isBinary) {
+        await chmod(buildConfig.options.outfile as string, 755);
+        logger.info(`Binary artifact ${buildConfig.options.outfile} built`);
+      } else {
+        logger.info(`Artifact ${buildConfig.options.outfile} built`);
       }
     }
 
