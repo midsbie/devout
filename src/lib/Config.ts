@@ -5,6 +5,7 @@ import { findUpMultiple } from "find-up";
 import merge from "lodash.merge";
 
 import { ProxiedPackageJson } from "./PackageJson";
+import { logger } from "./logger";
 
 export interface PartialConfigType {
   entry?: string;
@@ -58,8 +59,17 @@ export class ConfigBuilder {
   }
 
   async build(): Promise<Readonly<Config>> {
+    if (!this.config.entry) {
+      this.config.entry = this.packageJson.entry;
+      if (!this.config.entry) {
+        logger.error(
+          "Unable to determine an entry source file. Run 'devout init' to create a configuration file.",
+        );
+        process.exit(1);
+      }
+    }
+
     const json = merge(defaultConfig, this.config) as ConfigType;
-    if (!json.entry) json.entry = this.packageJson.entry;
 
     if (json.formats?.length > 0) json.formats = [...new Set(json.formats)];
     else json.formats = defaultFormats;
