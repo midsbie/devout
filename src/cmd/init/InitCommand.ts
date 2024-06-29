@@ -1,4 +1,4 @@
-import fs from "node:fs/promises";
+import { writeFile } from "node:fs/promises";
 import path from "node:path";
 
 import { Format, Platform } from "esbuild";
@@ -70,14 +70,14 @@ export class InitCommand extends CommandHandler<Options> {
     ];
     const answers = await inquirer.prompt(questions);
 
-    const config: ConfigType = {
+    const config: Partial<ConfigType> = {
       entry: answers.entry,
       output: answers.output,
       platform: answers.platform as Platform,
       formats: answers.formats as Format[],
     };
 
-    await fs.writeFile(
+    await writeFile(
       filename,
       `\
 export default ${JSON.stringify(config, null, 2)};
