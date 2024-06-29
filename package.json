@@ -5,7 +5,7 @@
   "scripts": {
     "build": "esbuild --bundle --format=esm --banner:js='#!/usr/bin/env -S node --enable-source-maps' --packages=external --minify --platform=node --sourcemap --outfile=dist/index.esm.js src/index.ts && chmod 755 dist/index.esm.js",
     "clean": "rm -rf dist",
-    "test": "jest",
+    "test": "vitest",
     "lint": "tsc --noEmit && eslint .",
     "prepublishOnly": "test -x dist/index.esm.js && npm run lint && npm run test"
   },
@@ -45,7 +45,6 @@
     "lodash.merge": "^4.6.2",
     "ora": "^8.0.1",
     "sass": "^1.77.6",
-    "typescript": "^5",
     "winston": "^3.13.0"
   },
   "devDependencies": {
@@ -57,8 +56,9 @@
     "esbuild": "^0.21.5",
     "eslint": "^8.57.0",
     "prettier": "^3.3.2",
+    "sass": "^1.77.6",
     "typescript": "^5.5.2",
     "typescript-eslint": "^7.13.1",
-    "sass": "^1.77.6"
+    "vitest": "^1.6.0"
   }
 }
