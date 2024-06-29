@@ -24,6 +24,13 @@ export class BuildCommand extends CommandHandler<Options> {
   progress!: Ora;
 
   async run(): Promise<void> {
+    if (this.context.config.entry.length < 1) {
+      logger.error(`\
+Unable to determine the entry source file. Please ensure the 'main', 'module', 'entry', or \
+'browser' field is correctly specified in your package.json file.`);
+      process.exit(1);
+    }
+
     if (this.context.config.formats.length < 1) {
       logger.warn("Nothing to build");
       process.exit(1);

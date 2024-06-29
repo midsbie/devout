@@ -65,12 +65,6 @@ export class ConfigBuilder {
 
     if (!this.config.entry) {
       this.config.entry = await this.guessEntry();
-      if (this.config.entry.length < 1) {
-        logger.error(`\
-Unable to determine the entry source file. Please ensure the 'main', 'module', 'entry', or \
-'browser' field is correctly specified in your package.json file.`);
-        process.exit(1);
-      }
     }
 
     if (typeof this.config.entry === "string") this.config.entry = [this.config.entry];

@@ -95,14 +95,6 @@ describe("ConfigBuilder", () => {
       expect(config.platform).toBe("browser");
     });
 
-    it("should log an error and exit if entry cannot be determined", async () => {
-      const packageJson = mockBasicPackageJson();
-      const builder = new ConfigBuilder(packageJson, {});
-
-      await expect(builder.build()).rejects.toThrow();
-      expect(logger.error).toHaveBeenCalled();
-    });
-
     it("should not include dependencies in bundle for libraries", async () => {
       const packageJson = mockPackageJson();
       const partialConfig: PartialConfigType = { type: "library" };
