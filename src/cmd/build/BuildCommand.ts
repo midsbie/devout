@@ -8,6 +8,7 @@ import {
   EsBuildCompiler,
   EsBuildConfigurator,
   GlobalOptions,
+  fileExists,
   isTypescriptExt,
   logger,
 } from "../../lib";
@@ -35,27 +36,40 @@ export class BuildCommand extends CommandHandler<Options> {
 
   private async compileCode() {
     const cfg = this.context.config;
+    const entries = cfg.codeEntry;
+    if (entries.length < 1) {
+      this.progress.start().warn("No code to build");
+      return;
+    }
+
     const configurator = new EsBuildConfigurator(this.context);
     const compiler = new EsBuildCompiler();
 
     this.progress.start("Building code...");
     for (const format of cfg.formats) {
-      const buildConfig = configurator.configure(format);
-      this.progress.start(`Building artifact: ${buildConfig.options.outfile}`);
+      for (const entry of entries) {
+        if (!(await fileExists(entry))) {
+          this.progress.fail(`Entry source file not found: ${entry}`);
+          process.exit(1);
+        }
 
-      try {
-        await compiler.build(buildConfig.options);
-      } catch (error) {
-        this.progress.fail("Build failed");
-        logger.error(error);
-        process.exit(1);
-      }
+        const buildConfig = configurator.configure(entry, format);
+        this.progress.start(`Building artifact: ${buildConfig.options.outfile}`);
 
-      if (buildConfig.isBinary) {
-        await chmod(buildConfig.options.outfile as string, 0o755);
-        this.progress.info(`Binary artifact built: ${buildConfig.options.outfile}`);
-      } else {
-        this.progress.info(`Artifact built: ${buildConfig.options.outfile}`);
+        try {
+          await compiler.build(buildConfig.options);
+        } catch (error) {
+          this.progress.fail("Build failed");
+          logger.error(error);
+          process.exit(1);
+        }
+
+        if (buildConfig.isBinary) {
+          await chmod(buildConfig.options.outfile as string, 0o755);
+          this.progress.info(`Binary artifact built: ${buildConfig.options.outfile}`);
+        } else {
+          this.progress.info(`Artifact built: ${buildConfig.options.outfile}`);
+        }
       }
     }
 
@@ -64,12 +78,16 @@ export class BuildCommand extends CommandHandler<Options> {
 
   private async generateTypes() {
     const cfg = this.context.config;
-    if (!cfg.declaration || !isTypescriptExt(cfg.entry)) return;
+    if (!cfg.declaration) return;
+
+    // FIXME: generating type declarations for the first Typescript source file entry.
+    const entry = cfg.entry.find(isTypescriptExt);
+    if (!entry) return;
 
     this.progress.start("Generating types...");
     const content = generateDtsBundle([
       {
-        filePath: cfg.entry,
+        filePath: entry,
         output: {
           exportReferencedTypes: false,
           noBanner: true,

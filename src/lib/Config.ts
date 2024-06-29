@@ -5,31 +5,30 @@ import { findUpMultiple } from "find-up";
 import merge from "lodash.merge";
 
 import { ProxiedPackageJson } from "./PackageJson";
+import { isCodeExt } from "./fs";
 import { logger } from "./logger";
 
 export interface PartialConfigType {
-  entry?: string;
+  entry?: string | string[];
   output?: string;
   platform?: Platform;
   declaration?: boolean;
 }
 
-export interface LibraryConfigType {
-  entry: string;
+export interface ConfigType {
+  entry: string[];
   output: string;
   formats: Format[];
   platform: Platform;
   declaration: boolean;
 }
 
-export type ConfigType = LibraryConfigType;
-
 // Keeping default formats separate for manual assignment to prevent final config from always
 // containing "cjs" and "esm" after merging default and user configs.
 const defaultFormats: Format[] = ["cjs", "esm"];
 
 export const defaultConfig: Readonly<ConfigType> = {
-  entry: "",
+  entry: [],
   output: "dist",
   formats: [], // see defaultFormats above
   platform: "node",
@@ -69,6 +68,8 @@ export class ConfigBuilder {
       }
     }
 
+    if (typeof this.config.entry === "string") this.config.entry = [this.config.entry];
+
     const json = merge(defaultConfig, this.config) as ConfigType;
 
     if (json.formats?.length > 0) json.formats = [...new Set(json.formats)];
@@ -85,8 +86,12 @@ export class Config {
     this.json = json;
   }
 
-  get entry(): string {
+  get entry(): string[] {
     return this.json.entry;
+  }
+
+  get codeEntry(): string[] {
+    return this.json.entry.filter(isCodeExt);
   }
 
   get output(): string {

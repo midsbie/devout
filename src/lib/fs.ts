@@ -10,5 +10,13 @@ export async function fileExists(filename: string): Promise<boolean> {
 }
 
 export function isTypescriptExt(filename: string): boolean {
-  return /\.(ts|tsx)$/.test(filename);
+  return /\.tsx?$/.test(filename);
+}
+
+export function isJavascriptExt(filename: string): boolean {
+  return /\.(mjs|jsx?)$/.test(filename);
+}
+
+export function isCodeExt(filename: string): boolean {
+  return isTypescriptExt(filename) || isJavascriptExt(filename);
 }

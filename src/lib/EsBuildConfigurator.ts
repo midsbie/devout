@@ -17,7 +17,7 @@ export class EsBuildConfigurator {
     this.context = context;
   }
 
-  configure(format: Format): EsBuildConfiguration {
+  configure(entry: string, format: Format): EsBuildConfiguration {
     const cfg = this.context.config;
     const outfile = cfg.getDistPathFor(`index.${format}.${this.resolveFormatExtension(format)}`);
 
@@ -31,7 +31,7 @@ export class EsBuildConfigurator {
 
     const buildOptions: BuildOptions = {
       ...props,
-      entryPoints: [cfg.entry],
+      entryPoints: [entry],
       bundle: true,
       format,
       platform: cfg.platform,
