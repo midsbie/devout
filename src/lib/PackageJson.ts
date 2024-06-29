@@ -15,17 +15,13 @@ export class PackageJson {
   readonly json: Readonly<Record<string, any>>;
 
   static load(fromPath?: string): ProxiedPackageJson {
-    try {
-      const r = findPackageJson(fromPath).next();
-      if (!r.value) {
-        throw new Error("Failed to determine location of package.json file");
-      }
+    const r = findPackageJson(fromPath).next();
+    if (r.done || !r.value) throw new PackageJsonNotFoundError();
 
+    try {
       return new PackageJson(r.filename, r.value);
-    } catch (error) {
-      throw new Error(
-        `Error reading or parsing package.json file: ${(error as any)?.message || "n/a"} `,
-      );
+    } catch (e) {
+      throw new PackageJsonParseError(e);
     }
   }
 
@@ -58,5 +54,17 @@ export class PackageJson {
 
     filename = this.pathFor(filename);
     return Object.keys(this.json.bin).some((k) => this.pathFor(this.json.bin[k]) === filename);
+  }
+}
+
+export class PackageJsonNotFoundError extends Error {
+  constructor() {
+    super("Failed to determine location of package.json file");
+  }
+}
+
+export class PackageJsonParseError extends Error {
+  constructor(cause: unknown) {
+    super("Error reading or parsing package.json file", { cause });
   }
 }
