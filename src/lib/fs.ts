@@ -20,3 +20,13 @@ export function isJavascriptExt(filename: string): boolean {
 export function isCodeExt(filename: string): boolean {
   return isTypescriptExt(filename) || isJavascriptExt(filename);
 }
+
+export function isStyleExt(filename: string): boolean {
+  return /\.scss$/.test(filename);
+}
+
+export function renameExtension(filename: string, newExt: string): string {
+  const baseName = filename.replace(/\.[^/.]+$/, "");
+  const formattedExt = newExt.startsWith(".") ? newExt : "." + newExt;
+  return baseName + formattedExt;
+}

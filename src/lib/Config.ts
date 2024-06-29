@@ -5,7 +5,7 @@ import { findUpMultiple } from "find-up";
 import merge from "lodash.merge";
 
 import { ProxiedPackageJson } from "./PackageJson";
-import { isCodeExt } from "./fs";
+import { isCodeExt, isStyleExt } from "./fs";
 import { logger } from "./logger";
 
 export interface PartialConfigType {
@@ -92,6 +92,10 @@ export class Config {
 
   get codeEntry(): string[] {
     return this.json.entry.filter(isCodeExt);
+  }
+
+  get styleEntry(): string[] {
+    return this.json.entry.filter(isStyleExt);
   }
 
   get output(): string {
