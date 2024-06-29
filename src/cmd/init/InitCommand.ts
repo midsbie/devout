@@ -5,7 +5,14 @@ import { Format, Platform } from "esbuild";
 import inquirer from "inquirer";
 
 import Application from "../../Application";
-import { CommandHandler, ConfigType, GlobalOptions, fileExists, logger } from "../../lib";
+import {
+  BuildType,
+  CommandHandler,
+  ConfigType,
+  GlobalOptions,
+  fileExists,
+  logger,
+} from "../../lib";
 
 interface Options extends GlobalOptions {}
 
@@ -38,28 +45,35 @@ export class InitCommand extends CommandHandler<Options> {
 
     const questions = [
       {
-        type: "input",
-        name: "entry",
-        message: "Enter the entry point of your library:",
-        default: this.context.packageJson.entry,
-      },
-      {
-        type: "input",
-        name: "output",
-        message: "Enter the output directory for your library:",
-        default: "dist",
+        type: "list",
+        name: "type",
+        message: "Select the build type:",
+        choices: ["application", "library"] as BuildType[],
+        default: this.context.config.type,
       },
       {
         type: "list",
         name: "platform",
-        message: "Select the target platform for your library:",
-        choices: ["node", "browser"],
-        default: "node",
+        message: "Select the target platform:",
+        choices: ["browser", "node"] as Platform[],
+        default: this.context.config.platform,
+      },
+      {
+        type: "input",
+        name: "entry",
+        message: "Enter the entry point:",
+        default: this.context.config.entry[0],
+      },
+      {
+        type: "input",
+        name: "output",
+        message: "Enter the output directory for the build artifacts:",
+        default: "dist",
       },
       {
         type: "checkbox",
         name: "formats",
-        message: "Select the output formats for your library:",
+        message: "Select the formats for the build artifacts:",
         choices: ["cjs", "esm"],
         default: this.context.packageJson.isModule ? ["esm"] : ["cjs", "esm"],
         validate: (ans: string[]) => {
