@@ -54,6 +54,8 @@ export class PackageJson {
   }
 
   isBin(filename: string): boolean {
+    if (!this.json.bin) return false;
+
     filename = this.pathFor(filename);
     return Object.keys(this.json.bin).some((k) => this.pathFor(this.json.bin[k]) === filename);
   }
