@@ -37,11 +37,14 @@
     "@types/lodash.merge": "^4.6.9",
     "chalk": "^5.3.0",
     "commander": "^12.1.0",
+    "dts-bundle-generator": "^9",
+    "esbuild": "^0",
     "find-package-json": "^1.2.0",
     "find-up": "^7.0.0",
     "inquirer": "^9.3.1",
     "lodash.merge": "^4.6.2",
     "ora": "^8.0.1",
+    "typescript": "^5",
     "winston": "^3.13.0"
   },
   "devDependencies": {
@@ -54,14 +57,7 @@
     "eslint": "^8.57.0",
     "prettier": "^3.3.2",
     "typescript": "^5.5.2",
-    "typescript-eslint": "^7.13.1"
-  },
-  "peerDependencies": {
-    "dts-bundle-generator": "^9",
-    "esbuild": "^0",
-    "eslint": "^8",
-    "prettier": "^3",
-    "typescript": "^5",
-    "typescript-eslint": "^7"
+    "typescript-eslint": "^7.13.1",
+    "sass": "^1.77.6"
   }
 }
