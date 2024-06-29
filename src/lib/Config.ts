@@ -4,6 +4,7 @@ import { Format, Platform } from "esbuild";
 import { findUpMultiple } from "find-up";
 import merge from "lodash.merge";
 
+import Application from "../Application";
 import { ProxiedPackageJson } from "./PackageJson";
 import { isCodeExt, isStyleExt } from "./fs";
 import { logger } from "./logger";
@@ -40,11 +41,9 @@ export class ConfigBuilder {
   config: PartialConfigType;
 
   static async load(packageJson: ProxiedPackageJson): Promise<ConfigBuilder> {
+    const configName = Application.get().name;
     let partialConfig: PartialConfigType = {};
-    const matches = await findUpMultiple([
-      `${packageJson.name}.config.js`,
-      `${packageJson.name}.config.mjs`,
-    ]);
+    const matches = await findUpMultiple([`${configName}.config.js`, `${configName}.config.mjs`]);
     if (matches?.length > 0) {
       const configModule = await import(matches[0]);
       partialConfig = configModule.default || configModule;

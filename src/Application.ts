@@ -53,6 +53,10 @@ class Application {
 
     this.rootCommand.addCommand(cmd);
   }
+
+  get name(): string {
+    return this.packageJson.name;
+  }
 }
 
 export default Application;
