@@ -1,4 +1,4 @@
-import { chmod, writeFile } from "node:fs/promises";
+import { chmod, mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 
 import { generateDtsBundle } from "dts-bundle-generator";
@@ -31,6 +31,7 @@ export class BuildCommand extends CommandHandler<Options> {
 
     this.progress = ora("Building...").start();
 
+    await mkdir(this.context.config.output, { recursive: true });
     await this.compileCode();
     await this.buildStyles();
     await this.generateTypes();
