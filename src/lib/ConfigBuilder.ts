@@ -1,3 +1,5 @@
+import path from "node:path";
+
 import { Format, Platform } from "esbuild";
 import { findUpMultiple } from "find-up";
 import merge from "lodash.merge";
@@ -5,6 +7,7 @@ import merge from "lodash.merge";
 import Application from "../Application";
 import { BuildType, Config, ConfigType, PartialConfigType } from "./Config";
 import { ProxiedPackageJson } from "./PackageJson";
+import { fileExists } from "./fs";
 import { logger } from "./logger";
 
 const validBuildTypes: Readonly<Set<BuildType>> = new Set(["library", "application"]);
@@ -12,6 +15,11 @@ const validBuildTypes: Readonly<Set<BuildType>> = new Set(["library", "applicati
 const knownAppPackages = ["react", "vue", "angular"];
 const knownBrowserPackages = ["webpack", "vite"];
 const knownAppScripts = ["build:app", "dev", "start", "serve"];
+
+// Not including src/* because these are assumed to be imported by the code.
+const knownStyleDirs = ["", "scss", "styles" /*, "src", "src/styles", "src/scss" */];
+const knownStyleNames = ["style", "styles", "main"];
+const knownStyleExts = ["scss", "sass"];
 
 // Keeping default formats separate for manual assignment to prevent final config from always
 // containing "cjs" and "esm" after merging default and user configs.
@@ -52,8 +60,8 @@ export class ConfigBuilder {
     if (!this.config.platform) this.config.platform = this.guessPlatform();
 
     if (!this.config.entry) {
-      this.config.entry = this.packageJson.entry;
-      if (!this.config.entry) {
+      this.config.entry = await this.guessEntry();
+      if (this.config.entry.length < 1) {
         logger.error(`\
 Unable to determine the entry source file. Please ensure the 'main', 'module', 'entry', or \
 'browser' field is correctly specified in your package.json file.`);
@@ -111,5 +119,25 @@ Unable to determine the entry source file. Please ensure the 'main', 'module', '
     }
 
     return "node";
+  }
+
+  private async guessEntry(): Promise<string[]> {
+    const entry: string[] = [];
+    if (this.packageJson.entry) entry.push(this.packageJson.entry);
+    if (this.config.platform !== "browser") return entry;
+
+    for (const dir of knownStyleDirs) {
+      for (const name of knownStyleNames) {
+        for (const ext of knownStyleExts) {
+          const filePath = path.join(dir, `${name}.${ext}`);
+          if (await fileExists(filePath)) {
+            entry.push(filePath);
+            return entry;
+          }
+        }
+      }
+    }
+
+    return entry;
   }
 }
