@@ -65,6 +65,10 @@ export class Config {
     return this.json.declaration;
   }
 
+  get includeDependenciesInBundle(): boolean {
+    return this.json.includeDependenciesInBundle;
+  }
+
   getDistPathFor(filename: string): string {
     return path.join(this.json.output, filename);
   }

@@ -35,7 +35,7 @@ export class EsBuildConfigurator {
       bundle: true,
       format,
       platform: cfg.platform,
-      packages: cfg.platform === "node" ? "external" : undefined,
+      packages: cfg.includeDependenciesInBundle ? undefined : "external",
       minify: true,
       outfile,
       sourcemap: true,

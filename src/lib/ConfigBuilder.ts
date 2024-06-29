@@ -59,6 +59,10 @@ export class ConfigBuilder {
     if (!this.config.type) this.config.type = this.guessBuildType();
     if (!this.config.platform) this.config.platform = this.guessPlatform();
 
+    if (this.config.includeDependenciesInBundle == null) {
+      this.config.includeDependenciesInBundle = this.config.type === "application";
+    }
+
     if (!this.config.entry) {
       this.config.entry = await this.guessEntry();
       if (this.config.entry.length < 1) {
