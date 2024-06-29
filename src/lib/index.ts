@@ -10,5 +10,3 @@ export * from "./EsBuildCompiler";
 export * from "./EsBuildConfigurator";
 export * from "./PackageJson";
 export * from "./ProjectContext";
-export * from "./TsDeclarationCompiler";
-
