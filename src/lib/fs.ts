@@ -8,3 +8,7 @@ export async function fileExists(filename: string): Promise<boolean> {
     return false;
   }
 }
+
+export function isTypescriptExt(filename: string): boolean {
+  return /\.(ts|tsx)$/.test(filename);
+}

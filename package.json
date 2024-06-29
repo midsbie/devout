@@ -41,6 +41,7 @@
     "find-up": "^7.0.0",
     "inquirer": "^9.3.1",
     "lodash.merge": "^4.6.2",
+    "ora": "^8.0.1",
     "winston": "^3.13.0"
   },
   "devDependencies": {

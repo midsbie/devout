@@ -10,6 +10,7 @@ export interface PartialConfigType {
   entry?: string;
   output?: string;
   platform?: Platform;
+  declaration?: boolean;
 }
 
 export interface LibraryConfigType {
@@ -17,6 +18,7 @@ export interface LibraryConfigType {
   output: string;
   formats: Format[];
   platform: Platform;
+  declaration: boolean;
 }
 
 export type ConfigType = LibraryConfigType;
@@ -30,6 +32,7 @@ export const defaultConfig: Readonly<ConfigType> = {
   output: "dist",
   formats: [], // see defaultFormats above
   platform: "node",
+  declaration: true,
 };
 
 export class ConfigBuilder {
@@ -86,6 +89,10 @@ export class Config {
 
   get platform(): Platform {
     return this.json.platform;
+  }
+
+  get declaration(): boolean {
+    return this.json.declaration;
   }
 
   getDistPathFor(filename: string): string {
