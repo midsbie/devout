@@ -1,4 +1,5 @@
-import { Config, ConfigBuilder } from "./Config";
+import { Config } from "./Config";
+import { ConfigBuilder } from "./ConfigBuilder";
 import { PackageJson, ProxiedPackageJson } from "./PackageJson";
 
 export class ProjectContext {
