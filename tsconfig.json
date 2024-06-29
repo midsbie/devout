@@ -11,6 +11,7 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "noImplicitAny": true,
+    "skipLibCheck": true,
     // For web applications targeting modern web browsers, the lib array should include typings for
     // the DOM and ECMAScript features in use. For React applications, DOM typings are essential for
     // manipulating and accessing the DOM. Targeting modern web browsers facilitates the use of
