@@ -6,17 +6,13 @@ import merge from "lodash.merge";
 
 import { ProxiedPackageJson } from "./PackageJson";
 
-export type Mode = "library";
-
 export interface PartialConfigType {
-  mode?: Mode;
   entry?: string;
   output?: string;
   platform?: Platform;
 }
 
 export interface LibraryConfigType {
-  mode: "library";
   entry: string;
   output: string;
   formats: Format[];
@@ -30,7 +26,6 @@ export type ConfigType = LibraryConfigType;
 const defaultFormats: Format[] = ["cjs", "esm"];
 
 export const defaultConfig: Readonly<ConfigType> = {
-  mode: "library",
   entry: "",
   output: "dist",
   formats: [], // see defaultFormats above
@@ -62,10 +57,6 @@ export class ConfigBuilder {
   async build(): Promise<Readonly<Config>> {
     const json = merge(defaultConfig, this.config) as ConfigType;
     if (!json.entry) json.entry = this.packageJson.entry;
-
-    if (json.mode !== "library") {
-      throw new Error(`Invalid build mode: ${json.mode}`);
-    }
 
     if (json.formats?.length > 0) json.formats = [...new Set(json.formats)];
     else json.formats = defaultFormats;

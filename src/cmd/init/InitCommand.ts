@@ -71,7 +71,6 @@ export class InitCommand extends CommandHandler<Options> {
     const answers = await inquirer.prompt(questions);
 
     const config: ConfigType = {
-      mode: "library",
       entry: answers.entry,
       output: answers.output,
       platform: answers.platform as Platform,
