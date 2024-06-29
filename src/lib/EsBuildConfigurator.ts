@@ -25,7 +25,7 @@ export class EsBuildConfigurator {
     const isBinary = this.context.packageJson.isBin(outfile);
     if (isBinary) {
       props.banner = {
-        js: "#!/usr/bin/env node",
+        js: "#!/usr/bin/env -S node --enable-source-maps",
       };
     }
 
