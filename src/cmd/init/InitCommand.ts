@@ -8,6 +8,7 @@ import Application from "../../Application";
 import {
   BuildType,
   CommandHandler,
+  ConfigBuilder,
   ConfigType,
   GlobalOptions,
   fileExists,
@@ -31,6 +32,8 @@ async function inquireYesOrNo(question: string): Promise<boolean> {
 
 export class InitCommand extends CommandHandler<Options> {
   async run(): Promise<void> {
+    const cfg = await new ConfigBuilder(this.context.packageJson, {}).build();
+
     const filename = path.join(
       path.dirname(this.context.packageJson.filename),
       `${Application.get().packageJson.name}.config.js`,
@@ -49,20 +52,20 @@ export class InitCommand extends CommandHandler<Options> {
         name: "type",
         message: "Select the build type:",
         choices: ["application", "library"] as BuildType[],
-        default: this.context.config.type,
+        default: cfg.type,
       },
       {
         type: "list",
         name: "platform",
         message: "Select the target platform:",
         choices: ["browser", "node"] as Platform[],
-        default: this.context.config.platform,
+        default: cfg.platform,
       },
       {
         type: "input",
         name: "entry",
-        message: "Enter the entry point:",
-        default: this.context.config.entry[0],
+        message: "Enter the entry point (separate multiple entries with commas):",
+        default: cfg.entry.join(", "),
       },
       {
         type: "input",
@@ -85,10 +88,10 @@ export class InitCommand extends CommandHandler<Options> {
     const answers = await inquirer.prompt(questions);
 
     const config: Partial<ConfigType> = {
-      entry: answers.entry,
-      output: answers.output,
-      platform: answers.platform as Platform,
-      formats: answers.formats as Format[],
+      entry: answers.entry.split(",").map((e: string) => e.trim()),
+      output: answers.output.trim(),
+      platform: answers.platform.trim() as Platform,
+      formats: answers.formats.map((e: string) => e.trim()) as Format[],
     };
 
     await writeFile(
