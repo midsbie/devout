@@ -7,8 +7,7 @@
     "clean": "rm -rf dist",
     "test": "jest",
     "lint": "tsx --noEmit && eslint .",
-    "prepare": "npm run build",
-    "prepublishOnly": "npm run test && npm run lint"
+    "prepublishOnly": "test -x dist/index.esm.js && npm run lint && npm run test"
   },
   "repository": {
     "type": "git",
