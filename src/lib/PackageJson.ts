@@ -50,7 +50,7 @@ export class PackageJson {
   }
 
   get entry(): string {
-    return this.json.main;
+    return this.json.main || this.json.module || this.json.entry || this.json.browser;
   }
 
   isBin(filename: string): boolean {

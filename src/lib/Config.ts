@@ -60,9 +60,9 @@ export class ConfigBuilder {
     if (!this.config.entry) {
       this.config.entry = this.packageJson.entry;
       if (!this.config.entry) {
-        logger.error(
-          "Unable to determine an entry source file. Run 'devout init' to create a configuration file.",
-        );
+        logger.error(`\
+Unable to determine the entry source file. Please ensure the 'main', 'module', 'entry', or \
+'browser' field is correctly specified in your package.json file.`);
         process.exit(1);
       }
     }
