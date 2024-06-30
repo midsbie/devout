@@ -178,6 +178,8 @@ Unable to determine the entry source file. Please ensure the 'main', 'module', '
     const emitResult = program.emit();
     const diags = ts.getPreEmitDiagnostics(program).concat(emitResult.diagnostics);
 
+    if (diags.length > 0) this.progress.stop();
+
     diags.forEach((diagnostic) => {
       if (!diagnostic.file) {
         logger.error(ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n"));
