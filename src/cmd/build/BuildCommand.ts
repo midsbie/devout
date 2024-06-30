@@ -11,6 +11,7 @@ import {
   EsBuildConfigurator,
   GlobalOptions,
   fileExists,
+  isTypescriptExt,
   logger,
   renameExtension,
 } from "../../lib";
@@ -105,11 +106,11 @@ Unable to determine the entry source file. Please ensure the 'main', 'module', '
   }
 
   private async generateTypes() {
-    const entries = this.context.config.codeEntry;
+    const entries = this.context.config.codeEntry.filter(isTypescriptExt);
     if (entries.length < 1) {
       this.progress
         .start()
-        .warn("No source code entry points found. Skipping declaration type generation.");
+        .warn("No suitable source code entry points found. Skipping declaration type generation.");
       return;
     }
 
