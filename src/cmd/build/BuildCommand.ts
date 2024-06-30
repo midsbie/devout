@@ -134,16 +134,27 @@ Unable to determine the entry source file. Please ensure the 'main', 'module', '
     // Uncomment to print unparsed contents of TS config file:
     // console.log(configFile.config);
 
+    // We delete these TS compiler options as a measure to prevent a number of errors when
+    // generating declaration types. This aims to reproduce the conditions when executing `tsc` in
+    // the terminal, as given:
+    //
+    // $ tsc --emitDeclarationOnly --esModuleInterop --declaration --jsx react \
+    //       --outFile index.d.ts --lib ... path/to/source.ts
+    //
     if (configFile.config.compilerOptions) {
       [
         "baseUrl",
         "declarationDir",
         "incremental",
+        "module",
+        "moduleResolution",
         "outDir",
         "paths",
         "pathsBasePath",
+        "sourceMap",
         "target",
         "tsBuildInfoFile",
+        "paths",
       ].forEach((k) => delete (configFile.config.compilerOptions as any)[k]);
     }
 
