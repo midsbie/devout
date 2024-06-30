@@ -6,7 +6,7 @@
     "build": "esbuild --bundle --format=esm --banner:js='#!/usr/bin/env -S node --enable-source-maps' --packages=external --minify --platform=node --sourcemap --outfile=dist/index.esm.js src/index.ts && chmod 755 dist/index.esm.js",
     "clean": "rm -rf dist",
     "test": "vitest",
-    "lint": "tsc --noEmit && eslint . && prettier --check .",
+    "lint": "tsc --noEmit && eslint . && prettier --check . && echo 'Lint checks passed'",
     "fmt": "prettier --write .",
     "prepublishOnly": "test -x dist/index.esm.js && npm run lint && npm run test -- --run"
   },
