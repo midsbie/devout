@@ -53,9 +53,9 @@
     "@types/inquirer": "^9.0.7",
     "@types/lodash.merge": "^4.6.9",
     "@types/node": "^20.14.8",
-    "eslint": "^8.57.0",
+    "eslint": "^9.6.0",
     "prettier": "^3.3.2",
-    "typescript-eslint": "^7.13.1",
+    "typescript-eslint": "^8.0.0-alpha.37",
     "vitest": "^1.6.0"
   }
 }
