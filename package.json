@@ -36,7 +36,6 @@
   "dependencies": {
     "chalk": "^5.3.0",
     "commander": "^12.1.0",
-    "dts-bundle-generator": "^9",
     "esbuild": "^0",
     "find-package-json": "^1.2.0",
     "find-up": "^7.0.0",
@@ -44,6 +43,8 @@
     "lodash.merge": "^4.6.2",
     "ora": "^8.0.1",
     "sass": "^1.77.6",
+    "strip-json-comments": "^5.0.1",
+    "typescript": "^5.5.2",
     "winston": "^3.13.0"
   },
   "devDependencies": {
@@ -52,12 +53,8 @@
     "@types/inquirer": "^9.0.7",
     "@types/lodash.merge": "^4.6.9",
     "@types/node": "^20.14.8",
-    "dts-bundle-generator": "^9.5.1",
-    "esbuild": "^0.21.5",
     "eslint": "^8.57.0",
     "prettier": "^3.3.2",
-    "sass": "^1.77.6",
-    "typescript": "^5.5.2",
     "typescript-eslint": "^7.13.1",
     "vitest": "^1.6.0"
   }

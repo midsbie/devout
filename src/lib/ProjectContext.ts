@@ -1,10 +1,12 @@
 import { Config } from "./Config";
 import { ConfigBuilder } from "./ConfigBuilder";
 import { PackageJson, PackageJsonNotFoundError, ProxiedPackageJson } from "./PackageJson";
+import { TsConfig } from "./TsConfig";
 import { logger } from "./logger";
 
 export class ProjectContext {
   readonly packageJson: ProxiedPackageJson;
+  readonly tsconfig: TsConfig | null;
   readonly config: Config;
 
   static async load(): Promise<ProjectContext> {
@@ -27,11 +29,17 @@ export class ProjectContext {
 
     const builder = await ConfigBuilder.load(packageJson);
     const config = await builder.build();
-    return new ProjectContext(packageJson, config);
+    const tsconfig = await TsConfig.load();
+    return new ProjectContext(packageJson, config, tsconfig);
   }
 
-  private constructor(packageJson: ProxiedPackageJson, config: Config) {
+  private constructor(
+    packageJson: ProxiedPackageJson,
+    config: Config,
+    tsconfig: TsConfig | null = null,
+  ) {
     this.packageJson = packageJson;
     this.config = config;
+    this.tsconfig = tsconfig;
   }
 }
