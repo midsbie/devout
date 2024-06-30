@@ -41,6 +41,13 @@ export class EsBuildConfigurator {
       sourcemap: true,
     };
 
+    // Pass a custom tsconfig object without the `paths` field to ensure that packages are treated
+    // as external in a workspaces repository. This prevents esbuild from bundling workspace
+    // dependencies together, maintaining them as external references instead.
+    if (!cfg.includeDependenciesInBundle && this.context.tsconfig) {
+      buildOptions.tsconfigRaw = this.context.tsconfig.cloneAndOmitCompilerOptions(["paths"]);
+    }
+
     return {
       isBinary,
       options: buildOptions,

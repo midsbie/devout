@@ -1,6 +1,7 @@
 import fs from "node:fs/promises";
 
 import { findUpMultiple } from "find-up";
+import cloneDeep from "lodash.clonedeep";
 import stripJsonComments from "strip-json-comments";
 
 import { logger } from "./logger";
@@ -34,6 +35,12 @@ export class TsConfig {
   private constructor(filename: string, json: Record<string, any>) {
     this.filename = filename;
     this.json = json;
+  }
+
+  cloneAndOmitCompilerOptions(compilerKeys: string[]): Record<string, any> {
+    const json = cloneDeep(this.json);
+    if (json.compilerOptions) compilerKeys.forEach((k) => delete json.compilerOptions[k]);
+    return json;
   }
 
   get compilerOptions(): any {
