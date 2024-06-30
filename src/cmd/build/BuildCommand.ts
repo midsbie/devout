@@ -114,6 +114,10 @@ Unable to determine the entry source file. Please ensure the 'main', 'module', '
       return;
     }
 
+    for (const entry of entries) {
+      await this.assertEntryExists(entry);
+    }
+
     const filename = this.context.tsconfig?.filename;
     if (!filename) {
       logger.warn("Cannot generate type declarations: tsconfig.json file is not found.");
@@ -137,7 +141,7 @@ Unable to determine the entry source file. Please ensure the 'main', 'module', '
 
     // We delete these TS compiler options as a measure to prevent a number of errors when
     // generating declaration types. This aims to reproduce the conditions when executing `tsc` in
-    // the terminal, as given:
+    // the terminal, as given in the following example:
     //
     // $ tsc --emitDeclarationOnly --esModuleInterop --declaration --jsx react \
     //       --outFile index.d.ts --lib ... path/to/source.ts
