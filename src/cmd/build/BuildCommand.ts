@@ -1,9 +1,9 @@
 import { chmod, mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 
-import { generateDtsBundle } from "dts-bundle-generator";
 import ora, { Ora } from "ora";
 import { initAsyncCompiler as initSassCompiler } from "sass";
+import ts, { DiagnosticCategory } from "typescript";
 
 import {
   CommandHandler,
@@ -11,7 +11,6 @@ import {
   EsBuildConfigurator,
   GlobalOptions,
   fileExists,
-  isTypescriptExt,
   logger,
   renameExtension,
 } from "../../lib";
@@ -68,7 +67,7 @@ Unable to determine the entry source file. Please ensure the 'main', 'module', '
         try {
           await compiler.build(buildConfig.options);
         } catch (error) {
-          this.progress.fail("Build failed");
+          this.progress.fail(`Failed to build artifact from ${entry}`);
           logger.error(error);
           process.exit(1);
         }
@@ -106,27 +105,105 @@ Unable to determine the entry source file. Please ensure the 'main', 'module', '
   }
 
   private async generateTypes() {
-    const cfg = this.context.config;
-    if (!cfg.declaration) return;
+    const entries = this.context.config.codeEntry;
+    if (entries.length < 1) {
+      this.progress
+        .start()
+        .warn("No source code entry points found. Skipping declaration type generation.");
+      return;
+    }
 
-    // FIXME: generating type declarations for the first Typescript source file entry.
-    const entry = cfg.entry.find(isTypescriptExt);
-    if (!entry) return;
+    const filename = this.context.tsconfig?.filename;
+    if (!filename) {
+      logger.warn("Cannot generate type declarations: tsconfig.json file is not found.");
+      return;
+    }
 
-    this.progress.start("Generating types...");
-    const content = generateDtsBundle([
-      {
-        filePath: entry,
-        output: {
-          exportReferencedTypes: false,
-          noBanner: true,
-        },
-      },
-    ]);
+    this.progress.start("Generating type declarations...");
+    const failedTask = () => {
+      this.progress.fail("Failed to generate type declarations");
+    };
 
-    const filename = cfg.getDistPathFor("index.d.ts");
-    await writeFile(filename, content[0], "utf8");
-    this.progress.succeed(`Types generated: ${filename}`);
+    const configFile = ts.readConfigFile(filename, ts.sys.readFile);
+    if (configFile.error) {
+      failedTask();
+      logger.error(`Could not read ${filename} file: ${configFile.error.messageText}`);
+      process.exit(1);
+    }
+
+    // Uncomment to print unparsed contents of TS config file:
+    // console.log(configFile.config);
+
+    if (configFile.config.compilerOptions) {
+      [
+        "baseUrl",
+        "declarationDir",
+        "incremental",
+        "outDir",
+        "paths",
+        "pathsBasePath",
+        "target",
+        "tsBuildInfoFile",
+      ].forEach((k) => delete (configFile.config.compilerOptions as any)[k]);
+    }
+
+    const configParseResult = ts.parseJsonConfigFileContent(
+      configFile.config,
+      ts.sys,
+      path.dirname(filename),
+    );
+
+    // Uncomment to print the source files automatically identified by Typescript:
+    // console.log(configParseResult.fileNames, configParseResult.options);
+
+    const programConfig = {
+      ...configParseResult.options,
+      declaration: true,
+      emitDeclarationOnly: true,
+      outFile: "dist/index.d.ts",
+    };
+
+    const program = ts.createProgram(entries, programConfig);
+    const emitResult = program.emit();
+    const diags = ts.getPreEmitDiagnostics(program).concat(emitResult.diagnostics);
+
+    diags.forEach((diagnostic) => {
+      if (!diagnostic.file) {
+        logger.error(ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n"));
+        return;
+      }
+
+      let suffix = "";
+      if (diagnostic.start != null) {
+        const r = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start);
+        suffix = ` (${r.line + 1},${r.character + 1})`;
+      }
+
+      const diag = ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n");
+      const msg = `${diagnostic.file.fileName}${suffix}: ${diag}`;
+      switch (diagnostic.category) {
+        case DiagnosticCategory.Warning:
+          logger.warn(msg);
+          break;
+
+        case DiagnosticCategory.Error:
+          logger.error(msg);
+          break;
+
+        case DiagnosticCategory.Suggestion:
+        case DiagnosticCategory.Message:
+        default:
+          logger.info(msg);
+          break;
+      }
+    });
+
+    if (emitResult.emitSkipped) {
+      failedTask();
+      process.exit(1);
+    }
+
+    this.progress.succeed("Type declarations generated");
   }
 
   private async assertEntryExists(filename: string): Promise<void> {
