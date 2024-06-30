@@ -8,7 +8,7 @@
     "test": "vitest",
     "lint": "tsc --noEmit && eslint . && prettier --check .",
     "fmt": "prettier --write .",
-    "prepublishOnly": "test -x dist/index.esm.js && npm run lint && npm run test"
+    "prepublishOnly": "test -x dist/index.esm.js && npm run lint && npm run test -- --run"
   },
   "repository": {
     "type": "git",
