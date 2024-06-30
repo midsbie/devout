@@ -10,6 +10,7 @@ import {
   EsBuildCompiler,
   EsBuildConfigurator,
   GlobalOptions,
+  TsConfig,
   fileExists,
   isTypescriptExt,
   logger,
@@ -118,23 +119,8 @@ Unable to determine the entry source file. Please ensure the 'main', 'module', '
       await this.assertEntryExists(entry);
     }
 
-    const filename = this.context.tsconfig?.filename;
-    if (!filename) {
-      logger.warn("Cannot generate type declarations: tsconfig.json file is not found.");
-      return;
-    }
-
+    const tsconfig = this.context.tsconfig || TsConfig.blank();
     this.progress.start("Generating type declarations...");
-    const failedTask = () => {
-      this.progress.fail("Failed to generate type declarations");
-    };
-
-    const configFile = ts.readConfigFile(filename, ts.sys.readFile);
-    if (configFile.error) {
-      failedTask();
-      logger.error(`Could not read ${filename} file: ${configFile.error.messageText}`);
-      process.exit(1);
-    }
 
     // Uncomment to print unparsed contents of TS config file:
     // console.log(configFile.config);
@@ -146,27 +132,25 @@ Unable to determine the entry source file. Please ensure the 'main', 'module', '
     // $ tsc --emitDeclarationOnly --esModuleInterop --declaration --jsx react \
     //       --outFile index.d.ts --lib ... path/to/source.ts
     //
-    if (configFile.config.compilerOptions) {
-      [
-        "baseUrl",
-        "declarationDir",
-        "incremental",
-        "module",
-        "moduleResolution",
-        "outDir",
-        "paths",
-        "pathsBasePath",
-        "sourceMap",
-        "target",
-        "tsBuildInfoFile",
-        "paths",
-      ].forEach((k) => delete (configFile.config.compilerOptions as any)[k]);
-    }
+    const unparsedConfig = tsconfig.cloneAndOmitCompilerOptions([
+      "baseUrl",
+      "declarationDir",
+      "incremental",
+      "module",
+      "moduleResolution",
+      "outDir",
+      "paths",
+      "pathsBasePath",
+      "sourceMap",
+      "target",
+      "tsBuildInfoFile",
+      "paths",
+    ]);
 
     const configParseResult = ts.parseJsonConfigFileContent(
-      configFile.config,
+      unparsedConfig,
       ts.sys,
-      path.dirname(filename),
+      tsconfig.dirname,
     );
 
     // Uncomment to print the source files automatically identified by Typescript:
@@ -217,7 +201,7 @@ Unable to determine the entry source file. Please ensure the 'main', 'module', '
     });
 
     if (emitResult.emitSkipped) {
-      failedTask();
+      this.progress.fail("Failed to generate type declarations");
       process.exit(1);
     }
 

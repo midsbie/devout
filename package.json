@@ -45,7 +45,6 @@
     "lodash.merge": "^4.6.2",
     "ora": "^8.0.1",
     "sass": "^1.77.6",
-    "strip-json-comments": "^5.0.1",
     "typescript": "^5.5.2",
     "winston": "^3.13.0"
   },

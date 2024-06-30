@@ -1,8 +1,7 @@
-import fs from "node:fs/promises";
+import path from "node:path";
 
-import { findUpMultiple } from "find-up";
 import cloneDeep from "lodash.clonedeep";
-import stripJsonComments from "strip-json-comments";
+import ts from "typescript";
 
 import { logger } from "./logger";
 
@@ -11,25 +10,31 @@ export class TsConfig {
   private readonly json: Record<string, any>;
 
   static async load(): Promise<TsConfig | null> {
-    const matches = await findUpMultiple(["tsconfig.json"]);
-    if (!matches || matches.length < 1) return null;
+    let currentDir = process.cwd();
+    let filename: string | undefined;
 
-    let sz;
-    try {
-      sz = (await fs.readFile(matches[0], "utf-8")).toString();
-    } catch (e) {
-      logger.warn(`failed to read ${matches[0]} file`);
+    while (true) {
+      filename = ts.findConfigFile(currentDir, ts.sys.fileExists);
+      if (filename) break;
+
+      const parentDir = path.resolve(currentDir, "..");
+      if (parentDir === currentDir) return null;
+      currentDir = parentDir;
+    }
+
+    if (!filename) return null;
+
+    const file = ts.readConfigFile(filename, ts.sys.readFile);
+    if (file.error) {
+      logger.warn(`failed to read ${filename} file`);
       return null;
     }
 
-    try {
-      const json = JSON.parse(stripJsonComments(sz));
-      return new TsConfig(matches[0], json);
-    } catch (e) {
-      logger.warn(`failed to parse contents of ${matches[0]} file`);
-    }
+    return new TsConfig(filename, file.config || {});
+  }
 
-    return null;
+  static blank(): TsConfig {
+    return new TsConfig(path.join(process.cwd(), "tsconfig.json"), {});
   }
 
   private constructor(filename: string, json: Record<string, any>) {
@@ -41,6 +46,10 @@ export class TsConfig {
     const json = cloneDeep(this.json);
     if (json.compilerOptions) compilerKeys.forEach((k) => delete json.compilerOptions[k]);
     return json;
+  }
+
+  get dirname(): string {
+    return path.dirname(this.filename);
   }
 
   get compilerOptions(): any {
