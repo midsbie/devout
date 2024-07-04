@@ -1,9 +1,9 @@
 # Devout
 
-Devout is a **WIP** NodeJS build tool specifically designed for library developers. It aims to
-eliminate repetitive tasks and enhance developer productivity by automating project setup and common
-build procedures. Whether you're initializing a new project, building your library, or cleaning up,
-Devout offers a simple, consistent command-line interface to efficiently manage your tasks.
+Devout is a **WIP** NodeJS build tool created with devotion for library developers who are
+passionate about their craft. It aims to elevate your development experience by automating project
+setup and common build procedures, allowing you to focus on creating outstanding code rather than
+managing repetitive tasks.
 
 ## Features
 
