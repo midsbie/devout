@@ -160,7 +160,16 @@ Unable to determine the entry source file. Please ensure the 'main', 'module', '
       ...configParseResult.options,
       declaration: true,
       emitDeclarationOnly: true,
-      outFile: "dist/index.d.ts",
+      // Specifying `outFile` creates a bundle of all type declarations where each module's
+      // declarations are wrapped by a `declare module` clause. Unfortunately this bundled form
+      // causes tsc to produce the following error when the package is imported:
+      //
+      //   error TS2306: File '/path/to/dist/index.d.ts' is not a module.
+      //
+      // Current workaround is to generate type declarations for each module using `outDir`.
+      //
+      // outFile: "dist/index.d.ts",
+      outDir: "dist",
     };
 
     const program = ts.createProgram(entries, programConfig);
