@@ -1,6 +1,6 @@
 {
   "name": "devout",
-  "version": "0.0.6",
+  "version": "0.1.0",
   "description": "A NodeJS build tool for devout library developers, dedicated to outputting pristine builds and streamlining project setup. It devotedly automates repetitive tasks, allowing developers to focus on what they do best: developing outstanding libraries.",
   "scripts": {
     "build": "esbuild --bundle --format=esm --banner:js='#!/usr/bin/env -S node --enable-source-maps' --packages=external --minify --platform=node --sourcemap --outfile=dist/index.esm.js src/index.ts && chmod 755 dist/index.esm.js",
