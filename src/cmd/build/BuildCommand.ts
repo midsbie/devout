@@ -169,7 +169,7 @@ Unable to determine the entry source file. Please ensure the 'main', 'module', '
       // Current workaround is to generate type declarations for each module using `outDir`.
       //
       // outFile: "dist/index.d.ts",
-      outDir: "dist",
+      outDir: this.context.config.output,
     };
 
     const program = ts.createProgram(entries, programConfig);
