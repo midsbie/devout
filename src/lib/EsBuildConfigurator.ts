@@ -1,6 +1,6 @@
 import { BuildOptions, Format } from "esbuild";
 
-import { ProjectContext } from "./ProjectContext";
+import { Configurator } from "./Configurator";
 
 const defaultExtension = "js";
 const formatExtensionOverrideMapping: Partial<Record<Format, string>> = {};
@@ -10,13 +10,7 @@ interface EsBuildConfiguration {
   options: BuildOptions;
 }
 
-export class EsBuildConfigurator {
-  context: ProjectContext;
-
-  constructor(context: ProjectContext) {
-    this.context = context;
-  }
-
+export class EsBuildConfigurator extends Configurator {
   configure(entry: string, format: Format): EsBuildConfiguration {
     const cfg = this.context.config;
     const outfile = cfg.getDistPathFor(`index.${format}.${this.resolveFormatExtension(format)}`);

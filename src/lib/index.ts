@@ -7,7 +7,9 @@ export * from "./CommandHandler";
 export * from "./Config";
 export * from "./ConfigBuilder";
 export * from "./EsBuildCompiler";
-export * from "./EsBuildConfigurator";
 export * from "./PackageJson";
 export * from "./ProjectContext";
 export * from "./TsConfig";
+
+export * from "./EsBuildConfigurator";
+export * from "./TscConfigurator";
