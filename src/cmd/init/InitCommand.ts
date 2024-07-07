@@ -15,7 +15,6 @@ import {
   logger,
 } from "../../lib";
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 interface Options extends GlobalOptions {}
 
 async function inquireYesOrNo(question: string): Promise<boolean> {

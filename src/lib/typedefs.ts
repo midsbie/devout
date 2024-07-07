@@ -2,7 +2,6 @@ import { Format, Platform } from "esbuild";
 
 import { ProjectContext } from "./ProjectContext";
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface GlobalOptions {}
 
 export type BuildType = "library" | "application";
