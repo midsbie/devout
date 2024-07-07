@@ -6,6 +6,7 @@ export interface ProxiedPackageJson {
   [key: string]: any;
 
   filename: string;
+  readonly json: Readonly<Record<string, any>>;
   get isModule(): boolean;
   isBin(filename: string): boolean;
 }
@@ -26,6 +27,9 @@ export class PackageJson {
   }
 
   private constructor(filename: string, json: Record<string, any>) {
+    // Suppressing the __path property added by the find-package-json package.
+    if (json.__path) delete json.__path;
+
     this.filename = filename;
     this.json = json;
 
