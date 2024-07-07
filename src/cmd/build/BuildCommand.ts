@@ -29,32 +29,34 @@ Unable to determine the entry source file. Please ensure the 'main', 'module', '
       process.exit(1);
     }
 
-    if (this.context.config.formats.length < 1) {
-      logger.warn("Nothing to build");
-      process.exit(1);
-    }
-
     this.progress = ora("Building...").start();
 
     await mkdir(this.context.config.output, { recursive: true });
-    await this.compileCode();
-    await this.buildStyles();
-    await this.generateTypes();
+    let count = await this.compileCode();
+    count += await this.buildStyles();
+    count += await this.generateTypes();
 
-    this.progress.succeed("Build completed successfully");
+    if (count > 0) this.progress.succeed("Build completed successfully");
+    else this.progress.fail("Nothing built");
   }
 
-  private async compileCode() {
+  private async compileCode(): Promise<number> {
     const cfg = this.context.config;
     const entries = cfg.codeEntry;
     if (entries.length < 1) {
       this.progress.start().warn("No code to build");
-      return;
+      return 0;
+    } else if (this.context.config.formats.length < 1) {
+      logger.error(`\
+Formats for build artifacts not specified. Please ensure at least one 'format' is specified in \
+your configuration file.`);
+      process.exit(1);
     }
 
     const configurator = new EsBuildConfigurator(this.context);
     const compiler = new EsBuildCompiler();
 
+    let count = 0;
     this.progress.start("Building code...");
     for (const format of cfg.formats) {
       for (const entry of entries) {
@@ -77,20 +79,24 @@ Unable to determine the entry source file. Please ensure the 'main', 'module', '
         } else {
           this.progress.info(`Artifact built: ${entry} -> ${buildConfig.options.outfile}`);
         }
+
+        ++count;
       }
     }
 
     this.progress.succeed("Code compiled");
+    return count;
   }
 
-  private async buildStyles() {
+  private async buildStyles(): Promise<number> {
     const cfg = this.context.config;
     const entries = cfg.styleEntry;
-    if (entries.length < 1) return;
+    if (entries.length < 1) return 0;
 
     this.progress.start("Building styles...");
     const compiler = await initSassCompiler();
 
+    let count = 0;
     for (const entry of entries) {
       await this.assertEntryExists(entry);
       const filename = cfg.getDistPathFor(renameExtension(path.basename(entry), "css"));
@@ -98,18 +104,20 @@ Unable to determine the entry source file. Please ensure the 'main', 'module', '
       const result = await compiler.compileAsync(entry, { style: "compressed" });
       await writeFile(filename, result.css);
       this.progress.info(`Style artifact built: ${entry} -> ${filename}`);
+      ++count;
     }
 
     this.progress.succeed("Styles built");
+    return count;
   }
 
-  private async generateTypes() {
+  private async generateTypes(): Promise<number> {
     const entries = this.context.config.typescriptEntry;
     if (entries.length < 1) {
       this.progress
         .start()
         .warn("No suitable source code entry points found. Skipping declaration type generation.");
-      return;
+      return 0;
     }
 
     for (const entry of entries) {
@@ -162,6 +170,7 @@ Unable to determine the entry source file. Please ensure the 'main', 'module', '
     }
 
     this.progress.succeed("Type declarations generated");
+    return 1;
   }
 
   private async assertEntryExists(filename: string): Promise<void> {
