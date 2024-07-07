@@ -2,7 +2,7 @@ import path from "node:path";
 
 import { Format, Platform } from "esbuild";
 
-import { isCodeExt, isStyleExt } from "./fs";
+import { isCodeExt, isStyleExt, isTypescriptExt } from "./fs";
 
 export type BuildType = "library" | "application";
 
@@ -47,6 +47,10 @@ export class Config {
 
   get codeEntry(): string[] {
     return this.json.entry.filter(isCodeExt);
+  }
+
+  get typescriptEntry(): string[] {
+    return this.json.entry.filter(isTypescriptExt);
   }
 
   get styleEntry(): string[] {

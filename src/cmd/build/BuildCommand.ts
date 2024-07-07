@@ -107,7 +107,7 @@ Unable to determine the entry source file. Please ensure the 'main', 'module', '
   }
 
   private async generateTypes() {
-    const entries = this.context.config.codeEntry.filter(isTypescriptExt);
+    const entries = this.context.config.typescriptEntry;
     if (entries.length < 1) {
       this.progress
         .start()
