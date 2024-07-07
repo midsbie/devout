@@ -16,9 +16,7 @@ import {
   renameExtension,
 } from "../../lib";
 
-interface Options extends GlobalOptions {
-  output: string;
-}
+interface Options extends GlobalOptions {}
 
 export class BuildCommand extends CommandHandler<Options> {
   progress!: Ora;
