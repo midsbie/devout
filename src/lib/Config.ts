@@ -3,28 +3,7 @@ import path from "node:path";
 import { Format, Platform } from "esbuild";
 
 import { isCodeExt, isStyleExt, isTypescriptExt } from "./fs";
-
-export type BuildType = "library" | "application";
-
-export interface PartialConfigType {
-  type?: BuildType;
-  platform?: Platform;
-  entry?: string | string[];
-  output?: string;
-  formats?: Format[];
-  declaration?: boolean;
-  includeDependenciesInBundle?: boolean;
-}
-
-export interface ConfigType {
-  type: BuildType;
-  platform: Platform;
-  entry: string[];
-  output: string;
-  formats: Format[];
-  declaration: boolean;
-  includeDependenciesInBundle: boolean;
-}
+import { BuildType, ConfigType, PackageJsonTransformerConfig } from "./typedefs";
 
 export class Config {
   json: ConfigType;
@@ -71,6 +50,10 @@ export class Config {
 
   get includeDependenciesInBundle(): boolean {
     return this.json.includeDependenciesInBundle;
+  }
+
+  get packageJsonTransformer(): PackageJsonTransformerConfig {
+    return this.json.packageJsonTransformer;
   }
 
   getDistPathFor(filename: string): string {

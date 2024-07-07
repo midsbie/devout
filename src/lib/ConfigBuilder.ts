@@ -5,10 +5,42 @@ import { findUpMultiple } from "find-up";
 import merge from "lodash.merge";
 
 import Application from "../Application";
-import { BuildType, Config, ConfigType, PartialConfigType } from "./Config";
+import { Config } from "./Config";
 import { ProxiedPackageJson } from "./PackageJson";
 import { fileExists } from "./fs";
 import { logger } from "./logger";
+import {
+  BuildType,
+  ConfigType,
+  PackageJsonTransformer,
+  PackageJsonTransformerConfig,
+} from "./typedefs";
+
+export type PackageJsonTransformerPreset = "none" | "default";
+
+export interface ClientPackageJsonConfig {
+  removeFields?: string[];
+  addFields?: {
+    main?: boolean;
+    types?: boolean;
+    exports?: boolean;
+  };
+}
+
+export interface ClientConfig {
+  type?: BuildType;
+  platform?: Platform;
+  entry?: string | string[];
+  output?: string;
+  formats?: Format[];
+  declaration?: boolean;
+  includeDependenciesInBundle?: boolean;
+  packageJsonTransformer?:
+    | boolean
+    | PackageJsonTransformer
+    | PackageJsonTransformerPreset
+    | PackageJsonTransformerConfig;
+}
 
 const validBuildTypes: Readonly<Set<BuildType>> = new Set(["library", "application"]);
 
@@ -25,6 +57,28 @@ const knownStyleExts = ["scss", "sass"];
 // containing "cjs" and "esm" after merging default and user configs.
 const defaultFormats: Readonly<Format[]> = ["cjs", "esm"];
 
+export const packageJsonConfigPresets: Record<
+  PackageJsonTransformerPreset,
+  PackageJsonTransformerConfig
+> = {
+  none: {
+    removeFields: [],
+    addFields: {
+      main: false,
+      types: false,
+      exports: false,
+    },
+  },
+  default: {
+    removeFields: ["devDependencies", "scripts"],
+    addFields: {
+      main: true,
+      types: true,
+      exports: true,
+    },
+  },
+};
+
 export const defaultConfig: Readonly<ConfigType> = {
   type: "library",
   platform: "node",
@@ -33,15 +87,16 @@ export const defaultConfig: Readonly<ConfigType> = {
   formats: [], // see defaultFormats above
   declaration: true,
   includeDependenciesInBundle: false,
+  packageJsonTransformer: null as any,
 };
 
 export class ConfigBuilder {
   packageJson: ProxiedPackageJson;
-  config: PartialConfigType;
+  config: ClientConfig;
 
   static async load(packageJson: ProxiedPackageJson): Promise<ConfigBuilder> {
     const configName = Application.get().name;
-    let partialConfig: PartialConfigType = {};
+    let partialConfig: ClientConfig = {};
     const matches = await findUpMultiple([`${configName}.config.js`, `${configName}.config.mjs`]);
     if (matches?.length > 0) {
       const configModule = await import(matches[0]);
@@ -50,7 +105,7 @@ export class ConfigBuilder {
     return new ConfigBuilder(packageJson, partialConfig);
   }
 
-  constructor(packageJson: ProxiedPackageJson, partial: PartialConfigType) {
+  constructor(packageJson: ProxiedPackageJson, partial: ClientConfig) {
     this.packageJson = packageJson;
     this.config = partial;
   }
@@ -69,7 +124,37 @@ export class ConfigBuilder {
 
     if (typeof this.config.entry === "string") this.config.entry = [this.config.entry];
 
-    const json = merge(defaultConfig, this.config) as ConfigType;
+    // Translate packageJson boolean value to preset
+    if (typeof this.config.packageJsonTransformer === "boolean") {
+      this.config.packageJsonTransformer = this.config.packageJsonTransformer ? "default" : "none";
+    }
+
+    // Translate packageJson preset to actual configuration or use default if none given.
+    if (typeof this.config.packageJsonTransformer === "string") {
+      const preset = packageJsonConfigPresets[this.config.packageJsonTransformer];
+      if (!preset) {
+        logger.error(
+          `Invalid package JSON configuration preset specified \
+('${this.config.packageJsonTransformer}')`,
+        );
+        process.exit(1);
+      }
+
+      this.config.packageJsonTransformer = preset;
+    } else if (!this.config.packageJsonTransformer) {
+      this.config.packageJsonTransformer = packageJsonConfigPresets.default;
+    }
+
+    // At this point, the packageJson configuration can be either null, an object or a function.
+    if (
+      typeof this.config.packageJsonTransformer !== "object" &&
+      typeof this.config.packageJsonTransformer !== "function"
+    ) {
+      logger.error("Invalid package JSON configuration specified");
+      process.exit(1);
+    }
+
+    const json = merge({}, defaultConfig, this.config) as ConfigType;
 
     if (!validBuildTypes.has(json.type)) {
       logger.error(`Invalid build type specified ('${json.type}')`);

@@ -3,8 +3,12 @@ import { findUpMultiple } from "find-up";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import Application from "../Application";
-import { PartialConfigType } from "./Config";
-import { ConfigBuilder } from "./ConfigBuilder";
+import {
+  ClientConfig,
+  ConfigBuilder,
+  PackageJsonTransformerPreset,
+  packageJsonConfigPresets,
+} from "./ConfigBuilder";
 import { PackageJson, ProxiedPackageJson } from "./PackageJson";
 import { fileExists } from "./fs";
 import { logger } from "./logger";
@@ -65,7 +69,7 @@ describe("ConfigBuilder", () => {
   describe("build", () => {
     it("should merge defaultConfig with partialConfig and packageJson values", async () => {
       const packageJson = mockPackageJson();
-      const partialConfig: PartialConfigType = { type: "application", entry: "src/index.js" };
+      const partialConfig: ClientConfig = { type: "application", entry: "src/index.js" };
       const builder = new ConfigBuilder(packageJson, partialConfig);
       const config = await builder.build();
 
@@ -97,7 +101,7 @@ describe("ConfigBuilder", () => {
 
     it("should not include dependencies in bundle for libraries", async () => {
       const packageJson = mockPackageJson();
-      const partialConfig: PartialConfigType = { type: "library" };
+      const partialConfig: ClientConfig = { type: "library" };
       const builder = new ConfigBuilder(packageJson, partialConfig);
       const config = await builder.build();
 
@@ -116,16 +120,43 @@ describe("ConfigBuilder", () => {
     );
   });
 
+  describe("packageJson", () => {
+    it.each([
+      ["default preset when nothing", {}, packageJsonConfigPresets.default],
+      [
+        "default preset when 'default'",
+        { packageJsonTransformer: "default" as PackageJsonTransformerPreset },
+        packageJsonConfigPresets.default,
+      ],
+      [
+        "default preset when true",
+        { packageJsonTransformer: true },
+        packageJsonConfigPresets.default,
+      ],
+      [
+        "none preset when 'none'",
+        { packageJsonTransformer: "none" as PackageJsonTransformerPreset },
+        packageJsonConfigPresets.none,
+      ],
+      ["none preset when false", { packageJsonTransformer: false }, packageJsonConfigPresets.none],
+    ])("should assume %s given", async (_: any, cfg: Partial<ClientConfig>, expectation: any) => {
+      const packageJson = mockPackageJson();
+      const builder = new ConfigBuilder(packageJson, cfg);
+      const config = await builder.build();
+      expect(config.packageJsonTransformer).toEqual(expectation);
+    });
+  });
+
   describe("guessBuildType", () => {
     it.each([
       [{ scripts: { start: "webpack serve" } }, "application"],
       [{ browser: {} }, "application"],
       [{}, "library"],
-    ])("should return correct build type for %o", async (pkgJson, expected) => {
+    ])("should return correct build type for %o", async (pkgJson, expectation) => {
       const packageJson = mockPackageJson({ ...pkgJson });
       const builder = new ConfigBuilder(packageJson, {});
       const config = await builder.build();
-      expect(config.type).toBe(expected);
+      expect(config.type).toBe(expectation);
     });
   });
 
@@ -136,11 +167,11 @@ describe("ConfigBuilder", () => {
       [{ devDependencies: { webpack: "^5.0.0" } }, "browser"],
       [{ scripts: { start: "vite serve" } }, "browser"],
       [{}, "node"],
-    ])("should return correct platform for %o", async (pkgJson, expected) => {
+    ])("should return correct platform for %o", async (pkgJson, expectation) => {
       const packageJson = mockPackageJson({ ...pkgJson });
       const builder = new ConfigBuilder(packageJson, {});
       const config = await builder.build();
-      expect(config.platform).toBe(expected);
+      expect(config.platform).toBe(expectation);
     });
   });
 
