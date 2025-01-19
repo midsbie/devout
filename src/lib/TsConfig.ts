@@ -5,6 +5,8 @@ import ts from "typescript";
 
 import { logger } from "./logger";
 
+const MAX_SEARCH_DEPTH = 25;
+
 export class TsConfig {
   readonly filename: string;
   private readonly json: Record<string, any>;
@@ -13,13 +15,18 @@ export class TsConfig {
     let currentDir = process.cwd();
     let filename: string | undefined;
 
-    while (true) {
+    let maxSearchDepth = MAX_SEARCH_DEPTH;
+    while (--maxSearchDepth > 0) {
       filename = ts.findConfigFile(currentDir, ts.sys.fileExists);
       if (filename) break;
 
       const parentDir = path.resolve(currentDir, "..");
       if (parentDir === currentDir) return null;
       currentDir = parentDir;
+    }
+
+    if (maxSearchDepth <= 0) {
+      throw new Error(`Failed to find tsconfig.json file after ${MAX_SEARCH_DEPTH} iterations`);
     }
 
     if (!filename) return null;
