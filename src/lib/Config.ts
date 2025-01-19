@@ -59,4 +59,8 @@ export class Config {
   getDistPathFor(filename: string): string {
     return path.join(this.json.output, filename);
   }
+
+  getRelativeDistPathFor(filename: string): string {
+    return `./${this.getDistPathFor(filename)}`;
+  }
 }

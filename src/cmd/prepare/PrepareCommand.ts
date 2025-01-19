@@ -38,7 +38,9 @@ export const defaultPackageJsonBuilder: PackageJsonTransformer = (
 
   let typingsArtifact;
   if (entry && config.declaration && isTypescriptExt(entry)) {
-    typingsArtifact = config.getDistPathFor(path.basename(entry).replace(/\.tsx?$/, ".d.ts"));
+    typingsArtifact = config.getRelativeDistPathFor(
+      path.basename(entry).replace(/\.tsx?$/, ".d.ts"),
+    );
   }
 
   if (entry && packageJsonConfig.addFields.main) {
