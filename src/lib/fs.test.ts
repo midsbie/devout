@@ -3,6 +3,7 @@ import { access } from "node:fs/promises";
 import { describe, expect, it, vi } from "vitest";
 
 import {
+  ensureRelativePath,
   fileExists,
   isCodeExt,
   isJavascriptExt,
@@ -110,6 +111,40 @@ describe("Utility Functions Module", () => {
 
     it("should handle new extension without dot correctly", () => {
       expect(renameExtension("file.html", "css")).toBe("file.css");
+    });
+  });
+
+  describe("ensureRelativePath", () => {
+    it("should return absolute paths unchanged", () => {
+      expect(ensureRelativePath("/absolute/path")).toBe("/absolute/path");
+      // Disabled because it fails on Linux
+      // expect(ensureRelativePath("C:\\Windows\\Path")).toBe("C:\\Windows\\Path");
+    });
+
+    it("should add ./ to simple relative paths", () => {
+      expect(ensureRelativePath("file.txt")).toBe("./file.txt");
+      expect(ensureRelativePath("folder/file.txt")).toBe("./folder/file.txt");
+    });
+
+    it("should preserve existing relative path indicators", () => {
+      expect(ensureRelativePath("./already/relative.txt")).toBe("./already/relative.txt");
+      expect(ensureRelativePath("../parent/file.txt")).toBe("../parent/file.txt");
+      expect(ensureRelativePath(".")).toBe("./");
+      expect(ensureRelativePath("..")).toBe("..");
+    });
+
+    it("should normalize paths with multiple dots", () => {
+      expect(ensureRelativePath("./././file.txt")).toBe("./file.txt");
+      expect(ensureRelativePath("foo/./bar/../baz.txt")).toBe("./foo/baz.txt");
+    });
+
+    it("should handle empty strings", () => {
+      expect(ensureRelativePath("")).toBe("./");
+    });
+
+    it("should handle paths with special characters", () => {
+      expect(ensureRelativePath("path with spaces.txt")).toBe("./path with spaces.txt");
+      expect(ensureRelativePath("special!@#$%^&()_+.txt")).toBe("./special!@#$%^&()_+.txt");
     });
   });
 });

@@ -1,4 +1,5 @@
 import fs from "node:fs/promises";
+import path from "node:path";
 
 export async function fileExists(filename: string): Promise<boolean> {
   try {
@@ -29,4 +30,14 @@ export function renameExtension(filename: string, newExt: string): string {
   const baseName = filename.replace(/\.[^/.]+$/, "");
   const formattedExt = newExt.startsWith(".") ? newExt : "." + newExt;
   return baseName + formattedExt;
+}
+
+export function ensureRelativePath(p: string): string {
+  const normalizedPath = path.normalize(p);
+  if (path.isAbsolute(normalizedPath)) {
+    return normalizedPath;
+  }
+
+  const relativePath = path.relative(".", normalizedPath);
+  return relativePath.startsWith(".") ? relativePath : `./${relativePath}`;
 }

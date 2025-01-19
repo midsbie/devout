@@ -10,6 +10,7 @@ import {
   GlobalOptions,
   PackageJsonTransformer,
   ProjectContext,
+  ensureRelativePath,
   isTypescriptExt,
 } from "../../lib";
 
@@ -38,8 +39,8 @@ export const defaultPackageJsonBuilder: PackageJsonTransformer = (
 
   let typingsArtifact;
   if (entry && config.declaration && isTypescriptExt(entry)) {
-    typingsArtifact = config.getRelativeDistPathFor(
-      path.basename(entry).replace(/\.tsx?$/, ".d.ts"),
+    typingsArtifact = ensureRelativePath(
+      config.getDistPathFor(path.basename(entry).replace(/\.tsx?$/, ".d.ts")),
     );
   }
 
@@ -62,7 +63,7 @@ export const defaultPackageJsonBuilder: PackageJsonTransformer = (
         if (!t) return e;
 
         const p = new EsBuildConfigurator(context).configure(entry, f).options.outfile;
-        if (p) e[t] = p;
+        if (p) e[t] = ensureRelativePath(p);
         return e;
       },
       {} as Record<string, any>,
