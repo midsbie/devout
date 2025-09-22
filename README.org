@@ -1,0 +1,39 @@
+* Devout
+
+Devout is a Node.js build tool for library development. It automates project setup and common build tasks, reducing manual configuration and repetition.
+
+* Features
+- Project initialization with predefined templates and configurations
+- Automatic compilation and bundling with configurable output directories
+- Project cleanup to remove build artifacts
+- Fast TypeScript compilation and bundling via esbuild
+- TypeScript declaration generation with dts-bundle-generator
+- SCSS compilation with sass
+
+* Motivation
+Devout was created to reduce repetitive steps in project setup and build processes, especially for TypeScript-based libraries. It provides a minimal-configuration workflow for initializing, building, and cleaning projects.
+
+* Installation
+#+BEGIN_SRC sh
+npm install -D devout
+#+END_SRC
+
+* Usage
+** Initialize a project
+#+BEGIN_SRC sh
+npx devout init
+#+END_SRC
+
+** Build a project
+#+BEGIN_SRC sh
+npx devout build -o <path>
+#+END_SRC
+Default output directory: ~dist~
+
+** Clean a project
+#+BEGIN_SRC sh
+npx devout clean
+#+END_SRC
+
+* License
+MIT License. See LICENSE for details.
